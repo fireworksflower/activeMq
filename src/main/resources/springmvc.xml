@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	 "
+       default-lazy-init="true">
+
+<!--开启注解扫描，创建spring容器要扫描的包-->
+    <context:component-scan base-package="com.hh">
+        <!--制定扫描规则，只扫描使用@Controller注解的Java类-->
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--配置视图解析器-->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!--配置自定义类型转换器-->
+    <bean id ="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+
+        <property name="converters">
+            <set>
+                <bean class="com.hh.utils.StringToDateConverter"/>
+            </set>
+        </property>
+    </bean>
+
+    <!--开启SpringMVC框架注解支持-->
+<!--自定义类型转换器需要显示添加注解-->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!--在springmvc的配置文件中可以配置，静态资源不过滤-->
+    <!--location表示路径，mapping表示文件,**表示该目录下的文件及其子目录的文件-->
+    <mvc:resources mapping="/css" location="/css/**"/>
+
+    <!--文件上传配置  id是固定值-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize">
+            <value>5242880</value>
+        </property>
+    </bean>
+
+</beans>

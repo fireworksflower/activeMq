@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd"
+       default-autowire="byName">
+    <import resource="jms-connection.xml"/>
+
+    <!--接受消息配置-->
+    <bean id="mgrCheckTopicDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="huahua.check.message.check"/>
+    </bean>
+    <bean id="mgrCheckMessageListener" class="com.hh.receiveactivemq.ReceiveActiveMqMessageListener">
+        <property name="taskExecutor" ref="mgrCheckTaskExecutor"/>
+    </bean>
+
+    <!--connectionFactory这个是获取连接池，然后判断连接池里面有没有mgrCheckTopicDestination配置的huahua消息，如果有再进mgrCheckMessageListener类里进行业务-->
+    <bean id="mgrCheckJmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destination" ref="mgrCheckTopicDestination"/>
+        <property name="messageListener" ref="mgrCheckMessageListener"/>
+    </bean>
+
+    <bean id="mgrCheckTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <!--线程池维护线程的最小数量-->
+        <property name="corePoolSize" value="5"/>
+        <!--线程池维护线程所允许的空闲时间-->
+        <property name="keepAliveSeconds" value="60"/>
+        <!--线程池维护线程的最大数量-->
+        <property name="maxPoolSize" value="1000"/>
+        <!--线程池所使用的缓冲队列-->
+        <property name="queueCapacity" value="200"/>
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$AbortPolicy"/>
+        </property>
+    </bean>
+
+
+
+
+</beans>
